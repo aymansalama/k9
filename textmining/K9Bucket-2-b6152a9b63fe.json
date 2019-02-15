@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "k9bucket-2",
+  "private_key_id": "b6152a9b63fe6ca7adcf437d4ef29ebc336b566b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDvak1amaHo0VNK\n1fWOfiVzfUorBnnwm+Qnfl4VYqqaxgwNsVKSLHOZImkITNpT+FzOyp8m50aMzKTw\n9tU/QfhUIDyR1CDtgoCGk5D2ByOeb/nOZdQYcCMwja8+IhASwn02rj08w2MeiXSs\nzpc0X4LHh3INpwFTXdWpYFPJMZKd2+z7PXj7LuJlkzFmrm3zH5GuOWNOl6RL4mFj\nLmbVaBEwH1PX8DjhI4zCzbechX3RU6+UGu2UhNkXx9TaTfWqBEN6QdZXJIWSzyQi\nYpibKQKR+SI8bqywTP/2z/jrCMlFAimuo7CCzrSIuagv3lgO5/Ein0SNkcVsoWRv\nFUaw5ATxAgMBAAECggEAHYbELHjHDZIHTjLt+llXYBNjGsRNNJ3dOPuuOb/132mu\nYd/tGYbu6MNkJbhosrNuKri1gRRD0KiKbQdcDFWj/SgOoEODnhcap746QgVmYKtZ\nqRlI24y04k+O/cAwsEeZLq21crF8H29/WrKN1lEzLU1ohQOEN9ZaO+3b13PMK7iP\nRFyLbGYtIrQ6dX92m+pIvN+3kyuWdyqtMt2GRjn+MEeuBx/0/Z1l3ZwKS6Kz0LD8\nkbKyRk8Z0Zd9H5InTgUC5ciXTJg8AxbqStt4BxIMhnGGbE6DV1mQ8CPeH9pIcPbd\nkA/b+8wF4CYoD2WbeVDluiI6MpvHCuhJRvspmE1NIQKBgQD3vzs5ahrLUXY1bOg3\nJvXIsgb6mrJw0B6t610F0Hi3458e3l3MDWgGU14s58ThelIMSDKAZLxeEWfnIADo\nREkIbaAHYcetQaNzecmX5vMPrP06t/ZDuDPLv7MGdDY8kktMz5J9MJR9XFcUN0hm\nVx4tLotRZ6IDJ5Myi83S5BIYCQKBgQD3ZASpjC6JS+kAzHfNoUPY8YpN4QJF4Kva\n8pOotDkGFZFI8329HeY0o3pgixH/OjzHlp3yjBVQ7MXcz/DjA0/shY+0WNDkkHzv\nndokhnjS98vgPOgJw2mpOdvlwZMVK7qBHawM1UaYJttnwNnjPuEPUbjAbbGABN/y\nJwvTJ2SvqQKBgAOm1/Kis75ndvyWnF2jv1+z8BJlkVfEWY9qtrZNOlpLip7j3DIT\nyIK/W9YBnI9ORENWFRh7Y6NnUka/3AOQbhsnsoIpWM4e94/OLcCFcPO8MwdYitK4\ntlq8eqEPuXTvGxkIvjoGK0olwErV/cU0Z4d29iq/Ak5VmP/Xu7LuFa4xAoGBANlE\ngQe6sqAoB+GIsWrpx6F/OHz/MTTXhXcL9fyDE1WxmWAdYH+4A5aVQIQLf2nM5tZP\nBDahKpNg7sDn6uIk5YuPHU9BdWxXLTJwSsYrR2/Y6rfsJcl1UpWp1+Mnp5o/RlPh\nEFpQ8OftsGGlsHZwoc4Hcp+ldu882MVd33e5sCbJAoGAeHQkwGaNdcJtgXpp/TUG\nNfBuqUGgnQznFR9kLwAx0ROZmtoibswY6X1YquyKnwhIQDGHK6yGt3LTUsxm4WMy\nyjJNXlJKf+MmuilqR1PqpzHTRdpWPmV7G3Rr53vE0Ti6FaSYtaqMyd7OjEcK+9Ht\nQ0xoAj5zl0w9/QuyduzEK0U=\n-----END PRIVATE KEY-----\n",
+  "client_email": "k9minersbucket-2@k9bucket-2.iam.gserviceaccount.com",
+  "client_id": "108892105284692990133",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/k9minersbucket-2%40k9bucket-2.iam.gserviceaccount.com"
+}

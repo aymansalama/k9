@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+
+<link href="https://fonts.googleapis.com/css?family=Comfortaa" rel="stylesheet">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/Home.css') }}">
+
+
+<header>
+
+<title>{{page_title}}</title>
+
+<div class="upnav">
+<img src="{{ url_for('static', filename='images/logo.jpeg') }}" style="width:90px;height:80px;float:left ; position:relative ; top:-30px; right:9px;">
+<a href=""> About </a>
+<a href=""> Help </a>
+<a href=""> FAQ </a>
+
+</div>
+
+ </header>
+
+ <body>
+
+<div class="ourlogo">
+	Text Miner
+
+</div>
+
+<div class="search">
+  <form action="{{url_for('search')}}" method="POST">
+    <input type="text" placeholder="Search" class="search_bar" value = "{{request.form.queryText}}" name="queryText">
+  </form>
+</div>
+
+<div class="quotes">
+<img src="{{ url_for('static', filename='images/quotes.png') }}" style="width:50px;height:50px;float:center ; position:relative ; bottom:10px;">
+Facilitating the wider use of underutilised crops...
+</div>
+
+
+
+
+
+
+ </body>
+
+
+
+</html>
+
+

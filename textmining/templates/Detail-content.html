@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css?family=Comfortaa" rel="stylesheet">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/Detail-content.css') }}">
+</head>
+
+
+<header>
+
+  <title>{{page_title}}</title>
+
+  <div class="upnav">
+    <a href="{{ url_for('dashboardToMain') }}" class =""><img src="{{ url_for('static', filename='images/logo.jpeg') }}" style="width:90px;height:80px;float:left ; position:relative ; top:-9px; right:9px;"></a>
+    <div class="ourlogo">
+      &nbsp&nbsp Text Miner 
+    </div>
+    <div class="search">
+      <form action="{{url_for('search')}}" method="POST">
+        <input type="text" placeholder="Search" class="search_bar" value = "{{request.form.queryText}}" name="queryText">
+      </form>
+    </div>
+  </div>
+
+ </header>
+
+ <body>
+    <div id="post_content"></div>
+    <script>
+        var queryString = decodeURIComponent(window.location.search);
+        var token = "blog_post=";
+        var regex = new RegExp("(?<="+ token+ ').*',"ig");
+        var found = queryString.match(regex);
+        var id = found[0];
+
+        {% for post in posts %}
+            var thePost = {{post|safe}};
+            var post_id = thePost['doc_id'];
+            var post_title = thePost['doc_title'];
+            if(post_id == id)
+            {
+                var post_content = thePost['doc_content'];
+            }
+        {% endfor %}
+
+        var split = post_content.split(/\r\n|\r|\n/);
+        var split_list = [];
+        // split_list['doc_c'] = []
+        for(s in split)
+        {
+            if(split[s] != "")
+            {
+            split_list.push(split[s].toString());
+            }
+        }
+        var post_title_container = document.createElement("div");
+        post_title_container.id = "post-title";
+        post_title_container.append(post_title);
+        var post_content_container = document.getElementById("post_content");
+        post_content_container.append(post_title_container);
+        for(i in split_list)
+        {
+            var par = document.createElement("p");
+            par.append(split_list[i]);
+            post_content_container.append(par);
+        }
+
+        
+    </script>
+ </body>
+
+ <footer>
+
+ <div class="downnav">
+
+<a href=""> About </a>
+<a href=""> Help </a>
+<a href=""> FAQ </a>
+</div>
+
+ </footer>
+
+</html>

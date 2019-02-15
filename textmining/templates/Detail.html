@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<head>
+  {{ JSGlue.include() }}
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css?family=Comfortaa" rel="stylesheet">
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/Detail.css') }}">
+</head>
+
+
+<header>
+
+  <title>{{page_title}}</title>
+
+  <div class="upnav">
+    <a href="{{ url_for('dashboardToMain') }}" class =""><img src="{{ url_for('static', filename='images/logo.jpeg') }}" style="width:90px;height:80px;float:left ; position:relative ; top:-9px; right:9px;"></a>
+    <div class="ourlogo">
+      &nbsp&nbsp Text Miner 
+    </div>
+    <div class="search">
+      <form action="{{url_for('search')}}" method="POST">
+        <input type="text" placeholder="Search" class="search_bar" value='{{input}}' name="queryText">
+      </form>
+    </div>
+  </div>
+
+ </header>
+
+ <body>
+   <div id="result_blog_container">
+  </div>
+    {% for post in posts %} 
+        <script>
+
+            function boldString(theString, unique)
+            {
+              return theString.replace(unique, "<b>"+unique+"</b>");
+            }
+
+            var post = {{post|safe}};
+            var doc_id = post['doc_id'];
+            var doc_url = post['doc_url'];
+            var doc_title = post['doc_title'];
+            var doc_content = post['doc_content'];
+            var concordance = post['concordance'];
+            var token = post['query_term'];
+
+            var result_blog_title = document.createElement("div");
+            var result_blog_link = document.createElement("a");
+            result_blog_title.id = 'result_blog_title';
+            result_blog_link.id = 'result_blog_link-'+doc_id;
+            result_blog_link.append(doc_title);
+            result_blog_title.append(result_blog_link);
+
+            var result_blog_url = document.createElement("div");
+            result_blog_url.id = 'result_blog_url-' + doc_id;
+            result_blog_url.append(doc_url)
+
+            var result_concordance = document.createElement("div");
+            result_concordance.id = 'result_concordance-'+ doc_id;
+            result_concordance.append(concordance);
+
+            var result_blog = document.createElement("div");
+            result_blog.id = 'result_blog' 
+
+            var blog_id = document.createElement("div");
+            blog_id.id = doc_id;
+            blog_id.append(result_blog_title);
+            blog_id.append(result_blog_url);
+            blog_id.append(result_concordance);
+            result_blog.append(blog_id)
+            
+
+            var result_blog_container = document.getElementById('result_blog_container');
+            result_blog_container.append(result_blog)
+
+            
+            for(j=0; j<token.length;j++)
+            {
+              var regex = new RegExp(token[j] + '\[\^\\s+]|' + token[j], "ig");
+              var found = concordance.match(regex);
+              if(found!=null)
+              {
+                var unique = found.filter((v, i, a) => a.indexOf(v) === i);
+              }
+
+              for(i=0;i<unique.length;i++)
+              {
+                var theString = document.getElementById('result_concordance-'+ doc_id).innerHTML;
+                result = boldString(theString, unique[i]);
+                document.getElementById('result_concordance-'+ doc_id).innerHTML = result;
+              }
+            }
+
+            // section for onclick event for blog title
+            var a = document.getElementById('result_blog_link-'+ doc_id);
+            a.setAttribute('href', "#");
+            a.setAttribute("onclick", "getContent(this.id)");
+
+        </script>
+    {% endfor %}
+    
+        <script>
+            function getContent(clicked_id)
+            {
+              var token = "result_blog_link-";
+              var regex = new RegExp('(?<='+token+').*',"ig");
+              var found = clicked_id.match(regex);
+              id = found[0];
+
+              var clicked_blog_url = "result_blog_url-" + id;
+              var clicked_blog_link = document.getElementById(clicked_blog_url).innerHTML;
+              // var queryString = "?blog_post=" + id;
+              // window.location.href = "/blog-content" + queryString;
+              window.location.href = clicked_blog_link;
+              
+              
+              
+
+              
+
+              // var stringifyJson = JSON.stringify(split_list);
+
+              // var json_string = '[';
+              // for(l in split_list)
+              // {
+              //   json_string = json_string + '"' + split_list[l] + '"' + ',';
+              // }
+              // json_string = json_string.slice(0, -1);
+              // json_string = json_string + ']';
+              // console.log(json_string)
+              
+              // var obj = JSON.parse(json_string);
+              
+              // location.href = Flask.url_for('blogContent', {"post-id": clicked_id, "the-post": '{{posts}}'});
+            }
+        </script>
+
+
+ </body>
+
+ <footer>
+
+ <div class="downnav">
+
+<a href=""> About </a>
+<a href=""> Help </a>
+<a href=""> FAQ </a>
+</div>
+
+ </footer>
+
+</html>
+
+

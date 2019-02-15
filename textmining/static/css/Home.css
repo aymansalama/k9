@@ -1,0 +1,79 @@
+* { -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box;}
+
+a{
+  text-decoration: none;
+} 
+
+
+/*header*/
+/*upper navigation */
+.upnav{
+  text-decoration:none;
+	text-align:right;
+	border-bottom:1px solid #eee;
+	word-spacing:1px;
+	padding:20px 30px 35px 30px ;
+	font-size:13px;
+  color:black;
+}
+
+
+.upnav a{
+  margin-left:30px;	
+}
+
+
+.upnav a:hover{
+  color:red;
+}
+
+
+/*body*/
+
+body{
+  font-family:'Comfortaa', cursive;
+}
+
+/*text miner logo*/
+.ourlogo{
+  text-align:center;
+  padding-top:160px;
+  font-size:60px;
+  color:#ff8c00;
+  font-weight:bold;
+  letter-spacing:5px;
+}
+
+/*serach bar*/
+.search{
+  text-align:center;
+}
+
+
+input[type=text]{
+  width:600px;
+  box-sizing:border-box;
+  border:1px solid #eee;
+  border-radius:25px;
+  font-size:13px;
+  background-color:#eee;
+  padding:12px 20px 12px 40px;
+  text-decoration:none;
+  outline:none;
+}
+
+
+input[type=text]:hover{
+  box-shadow:1px 1px 1px 1px rgba(0,0,0,0.1);
+}
+
+
+/*quotes*/
+.quotes{
+  text-align:center;
+  padding-top:40px;
+  font-size:13px;
+  letter-spacing:1px;
+}
+
+

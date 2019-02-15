@@ -1,0 +1,105 @@
+* { -webkit-box-sizing: border-box; -moz-box-sizing: border-box; box-sizing: border-box;}
+
+
+a{
+  text-decoration: none;
+} 
+
+
+/*header*/
+/*upper navigation */
+.upnav{
+  text-align: left;
+  text-decoration: none;
+	border-bottom: 1px solid #eee;
+	word-spacing: 1px;
+	padding:15px 30px 15px 30px ;
+	font-size:13px;
+	color:black;
+}
+
+
+.upnav a{
+}
+
+
+/*text miner logo*/
+.ourlogo{
+  text-align: left;
+  font-size: 20px;
+  color:#ff8c00;
+  font-weight: bold;
+  letter-spacing: 5px;
+}
+
+
+  /*serach bar*/
+/* .search{
+  text-align: left;
+} */
+
+input[type=text] {
+  width: 600px;
+  border: 1px solid #eee;
+  border-radius: 25px;
+  font-size: 13px;
+  background-color: #eee;
+  padding: 4px 20px 4px 40px;
+  text-decoration: none;
+  outline: none;
+  box-sizing: border-box;
+}
+
+
+input[type=text]:hover{
+  box-shadow: 1px 1px 1px 1px rgba(0,0,0,0.1);
+}
+
+
+
+/*body*/
+
+body{
+  font-family: 'Comfortaa', cursive;
+}
+
+
+
+/*bottom navigation bar*/
+.downnav{
+  text-decoration: none;
+  text-align: left;
+  border-top: 1px solid #eee;
+  word-spacing: 1px;
+  padding:0px 0px 15px 0px;
+  font-size:13px;
+  color:black;
+}
+
+
+.downnav a{
+  margin-left: 30px;
+}
+
+
+.downnav a:hover{
+  color:red;
+}
+
+#post_content
+{
+    margin-top: 5%;
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-bottom: 10%;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+#post-title
+{
+    font-size: 2em;
+    font-weight: 150;
+    padding: 0 0 1% 0; 
+    margin: 0 -1% 5% -1%;
+    border-bottom: 5px solid black;
+}
