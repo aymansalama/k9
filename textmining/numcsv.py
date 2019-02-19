@@ -36,15 +36,15 @@ fs = gcsfs.GCSFileSystem(project='k9-bucket-2')
 bucket_name = 'k9-bucket-2'
 # data_DB_path = bucket_name + '/dataStorage/data-DB.txt'
 # word_DB_path = bucket_name + '/dataStorage/word-DB.txt'
-filename = "eco_crop_items.csv"
+filename = "convert.csv"
 
 
 with fs.open(bucket_name + '/crawledDataCSV/' + filename) as json_obj:
    reader = pd.read_csv(json_obj)
-   title = reader['title']
-   content = reader['content']
-   id = reader['id']
-   url = reader['url']
+   title = reader['Title']
+   content = reader['Content']
+   id = reader['Id']
+   url = reader['Url']
 
 def convert_csv_to_json(json_doc):
     if json_doc is None:
@@ -127,7 +127,7 @@ def clean_comment(text):
         for f in pos_tag:
                 pos = get_pos(f[1])
                 if pos != " ":
-                        lemmatized.append(wordnet_lemmatizer.lemmatize(f[0], pos).encode("utf8"))
+                        lemmatized.append(wordnet_lemmatizer.lemmatize(f[0], pos))
                 else:
                         lemmatized.append(wordnet_lemmatizer.lemmatize(f[0]))
         return lemmatized
@@ -146,7 +146,6 @@ def write_to_json(id, frequency, url, word_db):
     # Insert the data into the dictionary based on keys and values
     for f in frequency:
         word_frequency[f[0]] = f[1]
-    
 
     if word_db is None:
         print("No data")
@@ -158,7 +157,6 @@ def write_to_json(id, frequency, url, word_db):
             'Word_frequency': word_frequency
         })
     else:
-        print("Got data")
         word_db.append({
             'Id': id,
             'Url': url,
@@ -178,18 +176,18 @@ def words_category(id, filtered_words, word_db_file):
             print("No data")
             word_db_file = {}
             word_db_file[fw] = []
-            word_db_file[fw].append(id)
+            word_db_file[str(fw)].append(str(id))
             return word_db_file
         # If got data, insert the data
         else:
             print("Got Data")
             # If keyword exists in the database, then append the value 
             if fw in word_db_file:
-                word_db_file[fw].append(id)
+                word_db_file[str(fw)].append(str(id))
             # If new keyword, create new array to store value
             else:
-                word_db_file[fw] = []
-                word_db_file[fw].append(id)
+                word_db_file[str(fw)] = []
+                word_db_file[str(fw)].append(str(id))
 
     return word_db_file       
 
@@ -271,7 +269,6 @@ for word_id, words, url, title in zip(id, lemmatized, url, lemmatized_title):
     word_db = write_to_json(word_id, frequency, url, word_db)
     word_cat_db = words_category(word_id, freqDist, word_cat_db)
 
-
 with buckets.open("dataStorage/data-DB.txt", "w") as json_file:
     json_file.write(json.dumps(word_db))
     print("data-DB modified")
@@ -327,9 +324,9 @@ def write_ngram(id, bigram, bifreq, trigram, trifreq, ngram_file):
     tg = {}
     
     for b, bf in zip(bigram, bifreq):
-        bg[b] = bf
+        bg[str(b)] = bf
     for t, tf in zip(trigram, trifreq):
-        tg[t] = tf
+        tg[str(t)] = tf
 
     if ngram_file is None:
         print("No data")
@@ -357,19 +354,19 @@ def bigram_cat(id, bigram, bigram_file):
         if bigram_file is None:
             print("No data")
             bigram_file = {}
-            bigram_file[b] = []
-            bigram_file[b].append(id)
+            bigram_file[str(b)] = []
+            bigram_file[str(b)].append(str(id))
             return bigram_file
         # If got data, insert the data
         else:
             print("Got Data")
             # If keyword exists in the database, then append the value 
             if b in bigram_file:
-                bigram_file[b].append(id)
+                bigram_file[str(b)].append(str(id))
             # If new keyword, create new array to store value
             else:
-                bigram_file[b] = []
-                bigram_file[b].append(id)
+                bigram_file[str(b)] = []
+                bigram_file[str(b)].append(str(id))
     
     return bigram_file
 
@@ -380,19 +377,19 @@ def trigram_cat(id, trigram, trigram_file):
         if trigram_file is None:
             print("No data")
             trigram_file = {}
-            trigram_file[t] = []
-            trigram_file[t].append(id)
+            trigram_file[str(t)] = []
+            trigram_file[str(t)].append(str(id))
             return trigram_file
         # If got data, insert the data
         else:
             print("Got Data")
             # If keyword exists in the database, then append the value 
             if t in trigram_file:
-                trigram_file[t].append(id)
+                trigram_file[str(t)].append(str(id))
             # If new keyword, create new array to store value
             else:
-                trigram_file[t] = []
-                trigram_file[t].append(id)
+                trigram_file[str(t)] = []
+                trigram_file[str(t)].append(str(id))
        
     return trigram_file
 
@@ -496,6 +493,8 @@ for ngram_id, words in zip(id, lemmatized_removed_space):
     # for t in filtered_tri['trigram']:
     #     tri = t[0] + " " + t[1] + " " + t[2]
     #     tri_string.append(tri)
+
+
     bi = bigram(words)
     bi_string = []
     bi_freq = []

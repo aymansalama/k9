@@ -246,7 +246,7 @@ def wordsFrequencyList(words_location, list_of_words):
             word_frequency_list = []
             for location in wl:
                 for l in page_data:
-                    if l["Id"] == location:
+                    if str(l["Id"]) == location:
                         word_frequency_list.append(l["Word_frequency"][low])
                         break
             total_word_frequency_list.append(word_frequency_list)
@@ -265,7 +265,7 @@ def bigramFreqList(bigram_location, bigram_list):
             word_frequency_list = []
             for location in wl:
                 for l in page_data:
-                    if l["Id"] == location:
+                    if str(l["Id"]) == location:
                         word_frequency_list.append(l["Bigrams"][low])
                         break
             total_word_frequency_list.append(word_frequency_list)
@@ -284,7 +284,7 @@ def trigramFreqList(trigram_location, trigram_list):
             word_frequency_list = []
             for location in wl:
                 for l in page_data:
-                    if l["Id"] == location:
+                    if str(l["Id"]) == location:
                         word_frequency_list.append(l["Trigrams"][low])
                         break
             total_word_frequency_list.append(word_frequency_list)
@@ -301,6 +301,7 @@ def get_all_freq(word_loc, lemmatized_removed_space, bigram_loc, bi_string, trig
         bigramFreq = bigramFreqList(bigram_loc, bi_string)
     else:
         bigramFreq = []
+    print(bigramFreq)
 
     if trigram_loc != []:
         trigramFreq = trigramFreqList(trigram_loc, tri_string)
@@ -342,9 +343,11 @@ def get_word_doc_union(word_loc, bigram_loc, trigram_loc):
         for t in trigram_loc:
             word_doc_union = list(set().union(word_doc_union, t))
 
-    word_doc_union.sort()
+    str_word = []
+    for s in word_doc_union:
+        str_word.append(str(s))
 
-    return word_doc_union
+    return str_word
 
 
 #------------------------------------------------------------------------------
@@ -364,9 +367,7 @@ def unionWordsFrequencyList(words_location, word_location_union, total_word_freq
                         union_freq.append(total_word_frequency_list[i][loc])
             else:
                 union_freq.append(0)
-        # print(union_freq)
         total_union_freq.append(union_freq)
-    
     return total_union_freq
 
 
@@ -435,7 +436,7 @@ def wordCountInDoc(doclist):
         
         for d in doclist:
             for w in word_db_file:
-                if w["Id"] == d:
+                if str(w["Id"]) == d:
                     wordCount.append(w["Total_Word_Count"])
     
     return wordCount
@@ -487,7 +488,6 @@ def get_final_score(idf, total_tf, word_doc_union, word_count, overlap):
             score.append(float(df) * float(value))
         final_score.append(score)
 
-
     total_final_score = []
     for i in range(0, len(final_score[0])):
         total_final_score.append(sum(j[i] for j in final_score))
@@ -510,7 +510,7 @@ def resultsJSON(final_score, token):
 
     for r in final_score:
         # Get the content to find the concordance
-        content = csv_data[str(r[0])]['content']
+        content = csv_data[r[0]]['content']
         sentencelist = [s.strip() for s in content.splitlines()]
         newl = ""
         for s in sentencelist:
@@ -596,5 +596,5 @@ def mainProcess(input):
     return resultsJson
     
 
-# text = "protein"
+# text = "albert einstein achievements"
 # mainProcess(text)
