@@ -4,11 +4,11 @@ import re
 import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize, RegexpTokenizer
 from nltk.corpus import stopwords
-import spacy
-import string
+from nltk.stem import WordNetLemmatizer
 from nltk.probability import FreqDist
+from nltk.util import ngrams
+import string
 import json
-from io import BytesIO
 import csv
 import gcsfs
 import gcs_client
@@ -31,12 +31,6 @@ def getBucket():
 buckets = getBucket()
 
 # export GOOGLE_APPLICATION_CREDENTIALS='K9Bucket-2-b6152a9b63fe.json'
-
-# storage_client = storage.Client()
-# bucket = storage_client.get_bucket('k9-bucket-2')
-# blob = bucket.blob('crawledDataCSV/eco_crop_items.csv')
-# print(type(blob))
-# df = pd.read_csv(blob)
 
 fs = gcsfs.GCSFileSystem(project='k9-bucket-2')
 bucket_name = 'k9-bucket-2'
@@ -104,25 +98,39 @@ def get_language(text):
 
 
 #filter for only english comments
-eng_content=content[content.apply(get_language)]
+# eng_content=content[content.apply(get_language)]
 # eng_title = title[title.apply(get_language)]
 # print(eng_title)
 
-nlp = spacy.load('en')
+def get_pos(treebank_tag):
+        if treebank_tag.startswith('J'):
+                return "a"
+        elif treebank_tag.startswith('V'):
+                return "v"
+        elif treebank_tag.startswith('N'):
+                return "n"
+        elif treebank_tag.startswith('R'):
+                return "r"
+        else:
+                return " "
 
-def clean_comments(text):
-    #remove punctuations
-    regex = re.compile('[' + re.escape(string.punctuation) + '\\r\\t\\n]')
-    nopunct = regex.sub(" ", str(text))
 
-    #use spacy to lemmatize comments
-    doc = nlp(nopunct.decode('utf8'), disable=['parser','ner'])
-    lemma = [token.lemma_ for token in doc]
-    filtered_stopwords = []
-    for l in lemma:
-        if l not in en_stopwords:
-            filtered_stopwords.append(l)
-    return filtered_stopwords
+wordnet_lemmatizer = WordNetLemmatizer()
+
+def clean_comment(text):
+        regex = re.compile('[' + re.escape(string.punctuation) + '\\r\\t\\n]')
+        nopunct = regex.sub(" ", str(text))
+        word_token = word_tokenize(nopunct)
+        filtered_stop = [word for word in word_token if word not in en_stopwords]
+        pos_tag = nltk.pos_tag(filtered_stop)
+        lemmatized = [] 
+        for f in pos_tag:
+                pos = get_pos(f[1])
+                if pos != " ":
+                        lemmatized.append(wordnet_lemmatizer.lemmatize(f[0], pos).encode("utf8"))
+                else:
+                        lemmatized.append(wordnet_lemmatizer.lemmatize(f[0]))
+        return lemmatized
 
 
 
@@ -206,10 +214,10 @@ def get_document_id(id, filename, id_db_file):
 
 
 
-lemmatized = eng_content.map(clean_comments)
+lemmatized = content.map(clean_comment)
 lemmatized = lemmatized.map(lambda x: [word.lower() for word in x])
 lemmatized_removed_space = []
-lemmatized_title = title.map(clean_comments)
+lemmatized_title = title.map(clean_comment)
 lemmatized_title = lemmatized_title.map(lambda x: [word.lower() for word in x])
 
 with buckets.open("dataStorage/id-DB.txt") as json_file:
@@ -428,48 +436,83 @@ with buckets.open('dataStorage/trigram-cat.txt') as json_file:
 
 unlist_comments = [item for items in lemmatized_removed_space for item in items]
 
+def bigram(text):
+        all_bigrams = ngrams(text, 2)
+        ngram_list = []
+        for ngram in all_bigrams:
+            lowered_bigram_tokens = map(lambda token: token.lower(), ngram)
+            if any(token not in en_stopwords for token in lowered_bigram_tokens):
+                ngram_list.append(' '.join(ngram))
+        # return ngram_list 
+        freqDist = FreqDist(ngram_list)
+        frequency = freqDist.most_common()
+        return frequency
+
+def trigram(text):
+        all_trigrams = ngrams(text, 3)
+        ngram_list = []
+        for ngram in all_trigrams:
+            lowered_trigram_tokens = map(lambda token: token.lower(), ngram)
+            if any(token not in en_stopwords for token in lowered_trigram_tokens):
+                ngram_list.append(' '.join(ngram))
+        # return ngram_list 
+        freqDist = FreqDist(ngram_list)
+        frequency = freqDist.most_common()
+        return frequency
+
 # for loop to loop bigrams and trigrams for each documents
 for ngram_id, words in zip(id, lemmatized_removed_space):
 
-    bigrams = nltk.collocations.BigramAssocMeasures()
-    trigrams = nltk.collocations.TrigramAssocMeasures()
+    # bigrams = nltk.collocations.BigramAssocMeasures()
+    # trigrams = nltk.collocations.TrigramAssocMeasures()
 
-    bigramFinder = nltk.collocations.BigramCollocationFinder.from_words(words)
-    trigramFinder = nltk.collocations.TrigramCollocationFinder.from_words(words)
+    # bigramFinder = nltk.collocations.BigramCollocationFinder.from_words(words)
+    # trigramFinder = nltk.collocations.TrigramCollocationFinder.from_words(words)
 
-    # --------------------------------------Bigrams--------------------------------------------------
-    bigram_freq = bigramFinder.ngram_fd.items()
-    bigramFreqTable = pd.DataFrame(list(bigram_freq), columns=['bigram','freq']).sort_values(by='freq', ascending=False)
-    bigramFreqTable.head().reset_index(drop=True)
+    # # --------------------------------------Bigrams--------------------------------------------------
+    # bigram_freq = bigramFinder.ngram_fd.items()
+    # bigramFreqTable = pd.DataFrame(list(bigram_freq), columns=['bigram','freq']).sort_values(by='freq', ascending=False)
+    # bigramFreqTable.head().reset_index(drop=True)
 
-    #filter bigrams
-    filtered_bi = bigramFreqTable[bigramFreqTable.bigram.map(lambda x: rightTypes(x))]
+    # #filter bigrams
+    # filtered_bi = bigramFreqTable[bigramFreqTable.bigram.map(lambda x: rightTypes(x))]
 
-    # --------------------------------------Trigrams--------------------------------------------------
-    trigram_freq = trigramFinder.ngram_fd.items()
-    trigramFreqTable = pd.DataFrame(list(trigram_freq), columns=['trigram','freq']).sort_values(by='freq', ascending=False)
-    trigramFreqTable.head().reset_index(drop=True)
+    # # --------------------------------------Trigrams--------------------------------------------------
+    # trigram_freq = trigramFinder.ngram_fd.items()
+    # trigramFreqTable = pd.DataFrame(list(trigram_freq), columns=['trigram','freq']).sort_values(by='freq', ascending=False)
+    # trigramFreqTable.head().reset_index(drop=True)
 
-    #filter trigrams
-    filtered_tri = trigramFreqTable[trigramFreqTable.trigram.map(lambda x: rightTypesTri(x))]
+    # #filter trigrams
+    # filtered_tri = trigramFreqTable[trigramFreqTable.trigram.map(lambda x: rightTypesTri(x))]
 
 
-    # format the filtered ngrams into strings     
+    # # format the filtered ngrams into strings     
+    # bi_string = []
+    # for b in filtered_bi['bigram']:
+    #     bi = b[0] + " " + b[1]
+    #     bi_string.append(bi)
+
+    # tri_string = []
+    # for t in filtered_tri['trigram']:
+    #     tri = t[0] + " " + t[1] + " " + t[2]
+    #     tri_string.append(tri)
+    bi = bigram(words)
     bi_string = []
-    for b in filtered_bi['bigram']:
-        bi = b[0] + " " + b[1]
-        bi_string.append(bi)
+    bi_freq = []
+    for b in bi:
+        bi_string.append(b[0])
+        bi_freq.append(b[1])
 
+    tri = trigram(words)
     tri_string = []
-    for t in filtered_tri['trigram']:
-        tri = t[0] + " " + t[1] + " " + t[2]
-        tri_string.append(tri)
-
-
+    tri_freq = []
+    for t in tri:
+        tri_string.append(t[0])
+        tri_freq.append(t[1]) 
 
 
     # Write the ngram and the frequency into file
-    ngram_DB = write_ngram(ngram_id, bi_string, filtered_bi['freq'], tri_string, filtered_tri['freq'], ngram_DB)
+    ngram_DB = write_ngram(ngram_id, bi_string, bi_freq, tri_string, tri_freq, ngram_DB)
 
     bigram_DB = bigram_cat(ngram_id, bi_string, bigram_DB)
     trigram_DB = trigram_cat(ngram_id, tri_string, trigram_DB)

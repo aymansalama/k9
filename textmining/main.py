@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_jsglue import JSGlue
-import q
+import query
 import ast, json
 import re
 
@@ -16,8 +16,11 @@ def home():
         return render_template('Detail.html', page_title = "Dashboard")
     else:
         global posts
-        posts = q.mainProcess(input)
-        return render_template('Detail.html', page_title = "Dashboard", posts=posts, input=input)
+        posts = query.mainProcess(input)
+        if posts is None:
+            return render_template('Detail_none.html', page_title = "Dashboard", input=input)
+        else:
+            return render_template('Detail.html', page_title = "Dashboard", posts=posts, input=input)
 
 
 

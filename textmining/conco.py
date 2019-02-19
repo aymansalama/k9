@@ -1,4 +1,13 @@
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.stem import WordNetLemmatizer
+from nltk.corpus import stopwords
+from nltk.util import ngrams
+from nltk.probability import FreqDist
 import re
+import string
+from sklearn.feature_extraction.text import TfidfTransformer
+
 # import nltk
 
 # def get_all_phases_containing_tar_wrd(target_word, tar_passage, left_margin = 10, right_margin = 10):
@@ -39,39 +48,95 @@ import re
 # results = get_all_phases_containing_tar_wrd('little pig', raw)
 # print(results)
 
-raw  = """The little pig saw the Wolf climb up on the roof and lit a roaring fire in the fireplace and placed on it a large kettle of water. When the wolf finally found the hole in the chimney he crawled down and KERSPLASH right into that kettle of water and that was the end of his troubles with the big bad wolf
-          
-          
-          The next days the little pig invited his mother over She said &amp;amp;quot;You see it is just as I told you. This is another sentence in the line that i want to try to split            
-          The way to get along in the world is to do the next things as well as you can.&amp;amp;quot; Fortunately for that little pig, he learned that lesson. And he just lived happily ever after!""" 
+raw  = "this is the achievement of albert einstein. He is a great man that makes the world a better place. Due to his contributions, we get to enjoy the technologies now that are based on his proof of theory."
 
 # sentencelist = [s.strip() for s in raw.splitlines()]
 # newlist = g.split(".") for g in sentencelist #split on periods
 # print(newlist)
 
 
-sentencelist = [s.strip() for s in raw.splitlines()]
-newl = ""
-for s in sentencelist:
-    if s:
-        newl = newl + s + " "
-    else:
-        newl = newl + " "
-sentencelist = newl.split(".")
+# sentencelist = [s.strip() for s in raw.splitlines()]
+# newl = ""
+# for s in sentencelist:
+#     if s:
+#         newl = newl + s + " "
+#     else:
+#         newl = newl + " "
+# sentencelist = newl.split(".")
 
-a = ['wolf']
-# s = [sentence for sentence in sentencelist if sentence.find("wolf") != -1]
-s = []
-for c in sentencelist:
-    if any(x in c.lower() for x in a):
-        s.append(c)
+# a = ['wolf']
+# # s = [sentence for sentence in sentencelist if sentence.find("wolf") != -1]
+# s = []
+# for c in sentencelist:
+#     if any(x in c.lower() for x in a):
+#         s.append(c)
 
-comb = ""
-for g in s :
-    comb = comb + g.strip() + "... "
-print(comb)
+# comb = ""
+# for g in s :
+#     comb = comb + g.strip() + "... "
+# print(comb)
+
+# List of stopwords in the nltk lib
+en_stopwords = set(stopwords.words('english'))
+
+def get_pos(treebank_tag):
+        if treebank_tag.startswith('J'):
+                return "a"
+        elif treebank_tag.startswith('V'):
+                return "v"
+        elif treebank_tag.startswith('N'):
+                return "n"
+        elif treebank_tag.startswith('R'):
+                return "r"
+        else:
+                return " "
 
 
+wordnet_lemmatizer = WordNetLemmatizer()
+
+def clean_comment(text):
+        regex = re.compile('[' + re.escape(string.punctuation) + '\\r\\t\\n]')
+        nopunct = regex.sub(" ", str(text))
+        word_token = word_tokenize(nopunct)
+        filtered_stop = [word for word in word_token if word not in en_stopwords]
+        pos_tag = nltk.pos_tag(filtered_stop)
+        lemmatized = [] 
+        for f in pos_tag:
+                pos = get_pos(f[1])
+                if pos != " ":
+                        lemmatized.append(wordnet_lemmatizer.lemmatize(f[0], pos).encode("utf8"))
+                else:
+                        lemmatized.append(wordnet_lemmatizer.lemmatize(f[0]))
+        return lemmatized
+
+
+def bigram(text):
+        all_bigrams = ngrams(text, 2)
+        ngram_list = []
+        for ngram in all_bigrams:
+            lowered_bigram_tokens = map(lambda token: token.lower(), ngram)
+            if any(token not in en_stopwords for token in lowered_bigram_tokens):
+                ngram_list.append(' '.join(ngram))
+        # return ngram_list 
+        freqDist = FreqDist(ngram_list)
+        frequency = freqDist.most_common()
+        return frequency
+
+def trigram(text):
+        all_trigrams = ngrams(text, 3)
+        ngram_list = []
+        for ngram in all_trigrams:
+            lowered_trigram_tokens = map(lambda token: token.lower(), ngram)
+            if any(token not in en_stopwords for token in lowered_trigram_tokens):
+                ngram_list.append(' '.join(ngram))
+        # return ngram_list 
+        freqDist = FreqDist(ngram_list)
+        frequency = freqDist.most_common()
+        return frequency
+
+tri = trigram(clean_comment(raw))
+print(tri[0][0])
+# print(bigram)
 
 
 

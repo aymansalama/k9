@@ -31,21 +31,37 @@ buckets = getBucket()
 # List of stopwords in the nltk lib
 en_stopwords = set(stopwords.words('english'))
 
-# Function to tokenize the sentence 
-nlp = spacy.load('en')
-def clean_comments(text):
-    #remove punctuations
-    regex = re.compile('[' + re.escape(string.punctuation) + '\\r\\t\\n]')
-    nopunct = regex.sub(" ", str(text))
 
-    #use spacy to lemmatize comments
-    doc = nlp(nopunct.decode('utf8'), disable=['parser','ner'])
-    lemma = [token.lemma_ for token in doc]
-    filtered_stopwords = []
-    for l in lemma:
-        if l not in en_stopwords:
-            filtered_stopwords.append(l)
-    return filtered_stopwords
+def get_pos(treebank_tag):
+        if treebank_tag.startswith('J'):
+                return "a"
+        elif treebank_tag.startswith('V'):
+                return "v"
+        elif treebank_tag.startswith('N'):
+                return "n"
+        elif treebank_tag.startswith('R'):
+                return "r"
+        else:
+                return " "
+
+
+wordnet_lemmatizer = WordNetLemmatizer()
+
+# Function to tokenize the sentence 
+def clean_comment(text):
+        regex = re.compile('[' + re.escape(string.punctuation) + '\\r\\t\\n]')
+        nopunct = regex.sub(" ", str(text))
+        word_token = word_tokenize(nopunct)
+        filtered_stop = [word for word in word_token if word not in en_stopwords]
+        pos_tag = nltk.pos_tag(filtered_stop)
+        lemmatized = [] 
+        for f in pos_tag:
+                pos = get_pos(f[1])
+                if pos != " ":
+                        lemmatized.append(wordnet_lemmatizer.lemmatize(f[0], pos).encode("utf8"))
+                else:
+                        lemmatized.append(wordnet_lemmatizer.lemmatize(f[0]))
+        return lemmatized
 
 def tokenizeString(text):
     regex = re.compile('[' + re.escape(string.punctuation) + '\\r\\t\\n]')
@@ -94,7 +110,7 @@ def rightTypesTri(ngram):
 
 def tokenize_input(text):
     # Section to tokenize the input 
-    lemmatized = clean_comments(text)
+    lemmatized = clean_comment(text)
     lemmatized = [word.lower() for word in lemmatized]
     lemmatized_removed_space = [w for w in lemmatized if w.isspace() == False]
     
@@ -592,5 +608,5 @@ def mainProcess(input):
     # return resultsJson
     
 
-text = "what is the achievement of albert einstein?"
+text = "protein"
 mainProcess(text)
