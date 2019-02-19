@@ -1,11 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for
-from flask_jsglue import JSGlue
 import query
 import ast, json
 import re
 
 app = Flask(__name__)
-jsglue = JSGlue(app)
 
 @app.route("/dashboard")
 def home():

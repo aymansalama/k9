@@ -532,11 +532,11 @@ def resultsJSON(final_score, token):
         # comb = unicodedata.normalize('NFKD', comb).encode('ascii','ignore')
         
         results.append({
-            'doc_id': str(r[0]).encode("utf8"),
-            'doc_title': csv_data[str(r[0])]['title'].encode("utf8"),
-            'doc_url': csv_data[str(r[0])]['url'].encode("utf8"),
-            'doc_content': csv_data[str(r[0])]['content'].encode("utf8"),
-            'concordance': comb.encode("utf8"),
+            'doc_id': str(r[0]),
+            'doc_title': csv_data[str(r[0])]['title'],
+            'doc_url': csv_data[str(r[0])]['url'],
+            'doc_content': csv_data[str(r[0])]['content'],
+            'concordance': comb,
             'query_term': token,
         })
     return results
