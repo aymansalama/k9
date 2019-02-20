@@ -1,7 +1,7 @@
 import pandas as pd
 import json
 import nltk
-from nltk.tokenize import word_tokenize, sent_tokenize, RegexpTokenizer
+from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.util import ngrams
@@ -10,9 +10,9 @@ import math
 from operator import itemgetter
 import string
 import gcs_client
-import time
+# import time
 
-start = time.time()
+# start = time.time()
 
 def getBucket():
     credentials_file = 'K9Bucket-2-b6152a9b63fe.json'
@@ -301,7 +301,6 @@ def get_all_freq(word_loc, lemmatized_removed_space, bigram_loc, bi_string, trig
         bigramFreq = bigramFreqList(bigram_loc, bi_string)
     else:
         bigramFreq = []
-    print(bigramFreq)
 
     if trigram_loc != []:
         trigramFreq = trigramFreqList(trigram_loc, tri_string)
@@ -463,7 +462,6 @@ def get_total_tf(union_wordFreq, union_bigramFreq, bigram_loc, union_trigramFreq
 def get_overlap(total_tf):
     overlap = []
     len_of_tf = len(total_tf[0])
-    print(len_of_tf)
     for i in range(0, len_of_tf):
         count = 0
         for tf in total_tf:
@@ -483,8 +481,8 @@ def get_final_score(idf, total_tf, word_doc_union, word_count, overlap):
         score = []
         for value, w in zip(i, word_count):
             if value > 0:
-                # value = 1 + math.log10(value)
-                value = float(value) / w
+                value = 1 + math.log10(value)
+                # value = float(value) / w
             score.append(float(df) * float(value))
         final_score.append(score)
 
@@ -544,15 +542,12 @@ def resultsJSON(final_score, token):
 def mainProcess(input):
     # Insert the input from html and tokenize the strings
     lemmatized_removed_space = tokenize_input(input)
-    print(lemmatized_removed_space)
     token_without_lemma = tokenizeString(input)
     bi_string = get_bi_string(lemmatized_removed_space)
-    print(bi_string)
     tri_string = get_tri_string(lemmatized_removed_space)
-    print(tri_string)
 
-    end = time.time()
-    print(end -start)
+    # end = time.time()
+    # print(end -start)
     
     # Get all the locations for words, bigrams and trigrams
     all_location = get_all_location(lemmatized_removed_space, bi_string, tri_string)

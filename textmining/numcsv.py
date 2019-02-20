@@ -36,15 +36,16 @@ fs = gcsfs.GCSFileSystem(project='k9-bucket-2')
 bucket_name = 'k9-bucket-2'
 # data_DB_path = bucket_name + '/dataStorage/data-DB.txt'
 # word_DB_path = bucket_name + '/dataStorage/word-DB.txt'
-filename = "convert.csv"
+filename = "crawledDataCSV_eco_crop_items.csv"
 
 
 with fs.open(bucket_name + '/crawledDataCSV/' + filename) as json_obj:
-   reader = pd.read_csv(json_obj)
-   title = reader['Title']
-   content = reader['Content']
-   id = reader['Id']
-   url = reader['Url']
+    print("Open csv file")
+    reader = pd.read_csv(json_obj)
+    title = reader['title']
+    content = reader['content']
+    id = reader['id']
+    url = reader['url']
 
 def convert_csv_to_json(json_doc):
     if json_doc is None:
@@ -121,7 +122,8 @@ def clean_comment(text):
         regex = re.compile('[' + re.escape(string.punctuation) + '\\r\\t\\n]')
         nopunct = regex.sub(" ", str(text))
         word_token = word_tokenize(nopunct)
-        filtered_stop = [word for word in word_token if word not in en_stopwords]
+        removed_single = [w for w in word_token if len(w)>1]
+        filtered_stop = [word for word in removed_single if word not in en_stopwords]
         pos_tag = nltk.pos_tag(filtered_stop)
         lemmatized = [] 
         for f in pos_tag:
@@ -130,6 +132,7 @@ def clean_comment(text):
                         lemmatized.append(wordnet_lemmatizer.lemmatize(f[0], pos))
                 else:
                         lemmatized.append(wordnet_lemmatizer.lemmatize(f[0]))
+        
         return lemmatized
 
 
@@ -191,18 +194,18 @@ def words_category(id, filtered_words, word_db_file):
 
     return word_db_file       
 
-def get_document_id(id, filename, id_db_file):
+# def get_document_id(id, filename, id_db_file):
     
-    if id_db_file is None:
-        print("Initialize Id file")
-        id_db_file = {}
-        id_db_file[id] = filename
-        return id_db_file
-    else:
-        print("Append new id")
-        id_db_file[id] = filename
+#     if id_db_file is None:
+#         print("Initialize Id file")
+#         id_db_file = {}
+#         id_db_file[id] = filename
+#         return id_db_file
+#     else:
+#         print("Append new id")
+#         id_db_file[id] = filename
     
-    return id_db_file
+#     return id_db_file
 
 
 
@@ -218,20 +221,20 @@ lemmatized_removed_space = []
 lemmatized_title = title.map(clean_comment)
 lemmatized_title = lemmatized_title.map(lambda x: [word.lower() for word in x])
 
-with buckets.open("dataStorage/id-DB.txt") as json_file:
-    id_db = None
+# with buckets.open("dataStorage/id-DB.txt") as json_file:
+#     id_db = None
 
-    try:
-        id_db = json.load(json_file)
-    except Exception as e:
-        print("got %s on json.load()" % e)
+#     try:
+#         id_db = json.load(json_file)
+#     except Exception as e:
+#         print("got %s on json.load()" % e)
 
-for i in id:
-    id_db = get_document_id(i, filename, id_db)
+# for i in id:
+#     id_db = get_document_id(i, filename, id_db)
 
-with buckets.open("dataStorage/id-DB.txt", "w") as json_file:
-    json_file.write(json.dumps(id_db))
-    print("All id(s) are recorded")
+# with buckets.open("dataStorage/id-DB.txt", "w") as json_file:
+#     json_file.write(json.dumps(id_db))
+#     print("All id(s) are recorded")
 
 
 

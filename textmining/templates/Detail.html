@@ -37,7 +37,6 @@
             }
 
             var post = {{post|safe}};
-            console.log(post);
             var doc_id = post['doc_id'];
             var doc_url = post['doc_url'];
             var doc_title = post['doc_title'];
@@ -65,6 +64,7 @@
 
             var blog_id = document.createElement("div");
             blog_id.id = doc_id;
+            blog_id.style.padding = "5px 30px 0px 30px"
             blog_id.append(result_blog_title);
             blog_id.append(result_blog_url);
             blog_id.append(result_concordance);
@@ -134,6 +134,10 @@
               
               // location.href = Flask.url_for('blogContent', {"post-id": clicked_id, "the-post": '{{posts}}'});
             }
+            var first_post_id = "{{posts[0]['doc_id']}}";
+            var first_post = document.getElementById(first_post_id)
+            first_post.style.backgroundColor = "#EEEEB1";
+
         </script>
 
 

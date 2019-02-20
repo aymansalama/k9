@@ -1,17 +1,18 @@
 import pandas as pd
 import json
 import nltk
-from nltk.tokenize import word_tokenize, sent_tokenize, RegexpTokenizer
+from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+from nltk.util import ngrams
 import re
 import math
 from operator import itemgetter
-import spacy
 import string
 import gcs_client
-import time
+# import time
 
-start = time.time()
+# start = time.time()
 
 def getBucket():
     credentials_file = 'K9Bucket-2-b6152a9b63fe.json'
@@ -49,19 +50,25 @@ wordnet_lemmatizer = WordNetLemmatizer()
 
 # Function to tokenize the sentence 
 def clean_comment(text):
-        regex = re.compile('[' + re.escape(string.punctuation) + '\\r\\t\\n]')
-        nopunct = regex.sub(" ", str(text))
-        word_token = word_tokenize(nopunct)
-        filtered_stop = [word for word in word_token if word not in en_stopwords]
-        pos_tag = nltk.pos_tag(filtered_stop)
-        lemmatized = [] 
-        for f in pos_tag:
-                pos = get_pos(f[1])
-                if pos != " ":
-                        lemmatized.append(wordnet_lemmatizer.lemmatize(f[0], pos).encode("utf8"))
-                else:
-                        lemmatized.append(wordnet_lemmatizer.lemmatize(f[0]))
-        return lemmatized
+    # regex to remove all the punctuations
+    regex = re.compile('[' + re.escape(string.punctuation) + '\\r\\t\\n]')
+    nopunct = regex.sub(" ", str(text))
+    
+    #tokenize the no punctation text
+    word_token = word_tokenize(nopunct)
+    # filter out all the stopwords
+    filtered_stop = [word for word in word_token if word not in en_stopwords]
+    #pos tagging all the tokens 
+    pos_tag = nltk.pos_tag(filtered_stop)
+
+    lemmatized = [] 
+    for f in pos_tag:
+        pos = get_pos(f[1])
+        if pos != " ":
+                lemmatized.append(wordnet_lemmatizer.lemmatize(f[0], pos))
+        else:
+                lemmatized.append(wordnet_lemmatizer.lemmatize(f[0]))
+    return lemmatized
 
 def tokenizeString(text):
     regex = re.compile('[' + re.escape(string.punctuation) + '\\r\\t\\n]')
@@ -123,50 +130,25 @@ def tokenize_input(text):
 # Section to process ngrams
 #-------------------------------------------------------------------------------
 
-def get_bi_string(lemmatized_removed_space):
-    bigrams = nltk.collocations.BigramAssocMeasures()
-    bigramFinder = nltk.collocations.BigramCollocationFinder.from_words(lemmatized_removed_space)
+def get_bi_string(text):
+        all_bigrams = ngrams(text, 2)
+        ngram_list = []
+        for ngram in all_bigrams:
+            lowered_bigram_tokens = map(lambda token: token.lower(), ngram)
+            if any(token not in en_stopwords for token in lowered_bigram_tokens):
+                ngram_list.append(' '.join(ngram))
+        
+        return ngram_list 
 
-    # --------------------------------------Bigrams--------------------------------------------------
-    bigram_freq = bigramFinder.ngram_fd.items()
-    bigramFreqTable = pd.DataFrame(list(bigram_freq), columns=['bigram','freq']).sort_values(by='freq', ascending=False)
-    bigramFreqTable.head().reset_index(drop=True)
+def get_tri_string(text):
+        all_trigrams = ngrams(text, 3)
+        ngram_list = []
+        for ngram in all_trigrams:
+            lowered_trigram_tokens = map(lambda token: token.lower(), ngram)
+            if any(token not in en_stopwords for token in lowered_trigram_tokens):
+                ngram_list.append(' '.join(ngram))
 
-    #filter bigrams
-    filtered_bi = bigramFreqTable[bigramFreqTable.bigram.map(lambda x: rightTypes(x))]
-
-    # format the filtered ngrams into strings 
-    try:
-        bi_string = []
-        for b in filtered_bi['bigram']:
-            bi = b[0] + " " + b[1]
-            bi_string.append(bi)
-    except:
-        bi_string = []
-    
-    return bi_string
-
-def get_tri_string(lemmatized_removed_space):
-    trigrams = nltk.collocations.TrigramAssocMeasures()
-    trigramFinder = nltk.collocations.TrigramCollocationFinder.from_words(lemmatized_removed_space)
-
-    # --------------------------------------Trigrams--------------------------------------------------
-    trigram_freq = trigramFinder.ngram_fd.items()
-    trigramFreqTable = pd.DataFrame(list(trigram_freq), columns=['trigram','freq']).sort_values(by='freq', ascending=False)
-    trigramFreqTable.head().reset_index(drop=True)
-
-    #filter trigrams
-    filtered_tri = trigramFreqTable[trigramFreqTable.trigram.map(lambda x: rightTypesTri(x))]
-
-    try:
-        tri_string = []
-        for t in filtered_tri['trigram']:
-            tri = t[0] + " " + t[1] + " " + t[2]
-            tri_string.append(tri)
-    except:
-        tri_string = []
-
-    return tri_string
+        return ngram_list
 
 
 
@@ -264,7 +246,7 @@ def wordsFrequencyList(words_location, list_of_words):
             word_frequency_list = []
             for location in wl:
                 for l in page_data:
-                    if l["Id"] == location:
+                    if str(l["Id"]) == location:
                         word_frequency_list.append(l["Word_frequency"][low])
                         break
             total_word_frequency_list.append(word_frequency_list)
@@ -283,7 +265,7 @@ def bigramFreqList(bigram_location, bigram_list):
             word_frequency_list = []
             for location in wl:
                 for l in page_data:
-                    if l["Id"] == location:
+                    if str(l["Id"]) == location:
                         word_frequency_list.append(l["Bigrams"][low])
                         break
             total_word_frequency_list.append(word_frequency_list)
@@ -302,7 +284,7 @@ def trigramFreqList(trigram_location, trigram_list):
             word_frequency_list = []
             for location in wl:
                 for l in page_data:
-                    if l["Id"] == location:
+                    if str(l["Id"]) == location:
                         word_frequency_list.append(l["Trigrams"][low])
                         break
             total_word_frequency_list.append(word_frequency_list)
@@ -360,9 +342,11 @@ def get_word_doc_union(word_loc, bigram_loc, trigram_loc):
         for t in trigram_loc:
             word_doc_union = list(set().union(word_doc_union, t))
 
-    word_doc_union.sort()
+    str_word = []
+    for s in word_doc_union:
+        str_word.append(str(s))
 
-    return word_doc_union
+    return str_word
 
 
 #------------------------------------------------------------------------------
@@ -382,9 +366,7 @@ def unionWordsFrequencyList(words_location, word_location_union, total_word_freq
                         union_freq.append(total_word_frequency_list[i][loc])
             else:
                 union_freq.append(0)
-        # print(union_freq)
         total_union_freq.append(union_freq)
-    
     return total_union_freq
 
 
@@ -439,7 +421,6 @@ def get_idf(word_loc, bigram_loc, trigram_loc, total_num_of_doc):
             idf.append(math.log10(wtq))
         else:
             idf.append(0)
-    
     return idf
 
 
@@ -449,12 +430,12 @@ def get_idf(word_loc, bigram_loc, trigram_loc, total_num_of_doc):
 def wordCountInDoc(doclist):
     
     wordCount = []
-    with open('data-DB.txt') as json_file:
+    with buckets.open('dataStorage/data-DB.txt') as json_file:
         word_db_file = json.load(json_file)
         
         for d in doclist:
             for w in word_db_file:
-                if w["Id"] == d:
+                if str(w["Id"]) == d:
                     wordCount.append(w["Total_Word_Count"])
     
     return wordCount
@@ -466,57 +447,57 @@ def get_total_tf(union_wordFreq, union_bigramFreq, bigram_loc, union_trigramFreq
     # variable used to determine the length of each word categories such as 
     # single word, bigram and trigram
     # Used as coordination for each word cat
-    len_of_word_categories = []
 
-    len_of_word_categories.append(len(union_wordFreq))
     for r in union_wordFreq:
         total_tf.append(r)
 
-    len_of_word_categories.append(len(union_bigramFreq))
     for r in union_bigramFreq:
         total_tf.append(r)
 
-    len_of_word_categories.append(len(union_trigramFreq))
     for t in union_trigramFreq:
         total_tf.append(t)
 
-    return (total_tf, len_of_word_categories)
+    return total_tf
+
+def get_overlap(total_tf):
+    overlap = []
+    len_of_tf = len(total_tf[0])
+    for i in range(0, len_of_tf):
+        count = 0
+        for tf in total_tf:
+            if tf[i] != 0:
+                count = count + 1
+        overlap.append(count)
+    return overlap
 
 
-def get_final_score(idf, total_tf, word_doc_union):
+
+    
+
+
+def get_final_score(idf, total_tf, word_doc_union, word_count, overlap):
     final_score = []
-
-    # word_amount = total_tf[1][0]
-    # bigram_amount = total_tf[1][1]
-    # trigram_amount = total_tf[1][2]
-
-    # word_score_rank = 1
-    # bigram_score_rank = 2
-    # trigram_score_rank = 3
-
-    for df, i in zip(idf, total_tf[0]):
+    for df, i in zip(idf, total_tf):
         score = []
-        for value in i:
+        for value, w in zip(i, word_count):
             if value > 0:
                 value = 1 + math.log10(value)
+            #     value = float(value) / 
             score.append(float(df) * float(value))
         final_score.append(score)
-
 
     total_final_score = []
     for i in range(0, len(final_score[0])):
         total_final_score.append(sum(j[i] for j in final_score))
 
-    final_list = zip(word_doc_union, total_final_score)
+    ttf = []
+    for f, o in zip(total_final_score, overlap):
+        ttf.append(f + o)
+        
+    final_list = zip(word_doc_union, ttf)
     final_list = sorted(final_list,key=itemgetter(1), reverse=True)
     
     return final_list
-
-def get_document_with_id(final_score_id):
-    with buckets.open("dataStorage/id-DB.txt") as json_file:
-        id_doc = json.load(json_file)
-    
-    return id_doc[str(final_score_id)]
 
 
 def resultsJSON(final_score, token):
@@ -527,7 +508,7 @@ def resultsJSON(final_score, token):
 
     for r in final_score:
         # Get the content to find the concordance
-        content = csv_data[str(r[0])]['content']
+        content = csv_data[r[0]]['content']
         sentencelist = [s.strip() for s in content.splitlines()]
         newl = ""
         for s in sentencelist:
@@ -549,11 +530,11 @@ def resultsJSON(final_score, token):
         # comb = unicodedata.normalize('NFKD', comb).encode('ascii','ignore')
         
         results.append({
-            'doc_id': str(r[0]).encode("utf8"),
-            'doc_title': csv_data[str(r[0])]['title'].encode("utf8"),
-            'doc_url': csv_data[str(r[0])]['url'].encode("utf8"),
-            'doc_content': csv_data[str(r[0])]['content'].encode("utf8"),
-            'concordance': comb.encode("utf8"),
+            'doc_id': str(r[0]),
+            'doc_title': csv_data[str(r[0])]['title'],
+            'doc_url': csv_data[str(r[0])]['url'],
+            'doc_content': csv_data[str(r[0])]['content'],
+            'concordance': comb,
             'query_term': token,
         })
     return results
@@ -565,8 +546,8 @@ def mainProcess(input):
     bi_string = get_bi_string(lemmatized_removed_space)
     tri_string = get_tri_string(lemmatized_removed_space)
 
-    end = time.time()
-    print(end -start)
+    # end = time.time()
+    # print(end -start)
     
     # Get all the locations for words, bigrams and trigrams
     all_location = get_all_location(lemmatized_removed_space, bi_string, tri_string)
@@ -584,6 +565,7 @@ def mainProcess(input):
 
     # Union all the related documents to make matrix column index
     word_doc_union = get_word_doc_union(word_loc, bigram_loc, trigram_loc)
+    word_count = wordCountInDoc(word_doc_union)
     
     # Get all the union freq based on word_doc_union
     all_union_freq = get_union_wordFreq(word_loc, word_doc_union, wordFreq, bigram_loc, bigramFreq, trigram_loc, trigramFreq)
@@ -599,14 +581,14 @@ def mainProcess(input):
     idf = get_idf(word_loc, bigram_loc, trigram_loc, total_amount_of_doc)
     # Get the total term frequencies
     total_tf = get_total_tf(union_wordFreq, union_bigramFreq, bigram_loc, union_trigramFreq, trigram_loc)
+    overlap = get_overlap(total_tf)
     # Get the final scoring for all documents based on the inputs
-    final_score = get_final_score(idf, total_tf, word_doc_union)
+    final_score = get_final_score(idf, total_tf, word_doc_union, word_count, overlap)
     resultsJson = resultsJSON(final_score, token_without_lemma)
-    print(resultsJson)
+    # print(final_sco0re)
 
-
-    # return resultsJson
+    return resultsJson
     
 
-text = "protein"
-mainProcess(text)
+# text = "albert einstein achievements"
+# mainProcess(text)
